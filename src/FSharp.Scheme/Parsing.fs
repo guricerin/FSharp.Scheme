@@ -5,16 +5,18 @@ open System
 module Parsing =
     open FParsec
     open FSharp.Scheme.Core.Ast
+    open Ast
 
     type Parser<'a> = Parser<'a, unit>
 
+    // 再帰的な文法構造において必要
+    let parseExpr, parseExprRef: Parser<LispVal> * ref<Parser<LispVal>> = createParserForwardedToRef()
+
     let symbol: Parser<char> = anyOf "!#$%&|*+-/:<=>?@^_~"
 
-    let blank = spaces1
+    let internal nonEscapedChar: Parser<char> = noneOf [ '\\'; '"' ]
 
-    let nonEscapedChar: Parser<char> = noneOf [ '\\'; '"' ]
-
-    let convEsc =
+    let internal convEsc =
         function
         | 'b' -> '\b'
         | 'f' -> '\f'
@@ -23,68 +25,67 @@ module Parsing =
         | 't' -> '\t'
         | c -> c
 
-    let escapedChar: Parser<char> = pchar '\\' >>. anyOf @"\""/bfnrt" |>> convEsc
+    let internal escapedChar: Parser<char> = pchar '\\' >>. anyOf @"\""/bfnrt" |>> convEsc
 
-    let parseAtom: Parser<Ast.LispVal> =
+    let parseAtom: Parser<LispVal> =
         parse {
             let! first = letter <|> symbol
             let! rest = manyChars (letter <|> digit <|> symbol)
             let atom = sprintf "%c%s" first rest
             return match atom with
-                   | "#t" -> Ast.Bool true
-                   | "#f" -> Ast.Bool false
-                   | _ -> Ast.Atom atom
+                   | "#t" -> Bool true
+                   | "#f" -> Bool false
+                   | _ -> Atom atom
         }
 
-    let parseString: Parser<Ast.LispVal> =
+    let parseString: Parser<LispVal> =
         parse {
-            let! x = manyChars (nonEscapedChar <|> escapedChar) |> between (pchar '"') (pchar '"')
-            return Ast.String x }
-
-    let parseCharcter: Parser<Ast.LispVal> =
-        parse {
-            let! x = (nonEscapedChar <|> escapedChar) |> between (pchar ''') (pchar ''')
-            return Ast.Character x }
+            do! skipChar '"'
+            let! x = manyChars (nonEscapedChar <|> escapedChar)
+            do! skipChar '"'
+            return String x
+        }
 
     let numberFormat =
         NumberLiteralOptions.AllowMinusSign ||| NumberLiteralOptions.AllowFraction
         ||| NumberLiteralOptions.AllowExponent
 
-    let parseNumber: Parser<Ast.LispVal> =
+    let parseNumber: Parser<LispVal> =
         parse {
             let x = numberLiteral numberFormat "number"
             let! x = x |>> fun x ->
-                         if x.IsInteger then Ast.Integer(int x.String) else Ast.Float(float x.String)
+                         if x.IsInteger then Integer(int x.String) else Float(float x.String)
             return x
         }
 
-    let rec parseExpr: Parser<Ast.LispVal> =
-        choice [ parseAtom; parseString; parseCharcter; parseNumber; parseQuoted; parseListOrDotted ]
-
-    // fixme stack overflow
-    and parseList: Parser<Ast.LispVal> =
+    let parseList: Parser<LispVal> =
         parse {
-            let! x = sepBy parseExpr blank
-            return Ast.List x }
+            let! xs = sepBy parseExpr spaces1
+            return List xs }
 
-    and parseDottedList: Parser<Ast.LispVal> =
+    let parseDottedList: Parser<LispVal> =
         parse {
-            let! head = sepEndBy parseExpr blank
-            let! tail = pchar '.' >>. blank >>. parseExpr
-            return Ast.DottedList(head, tail) }
+            let! head = sepEndBy parseExpr spaces
+            let! tail = pchar '.' >>. spaces1 >>. parseExpr
+            return DottedList(head, tail) }
 
-    and parseQuoted: Parser<Ast.LispVal> =
+    let parseQuoted: Parser<LispVal> =
         parse {
-            let! x = pchar ''' >>. parseExpr
-            return Ast.List
-                       [ Ast.Atom "quote"
-                         x ]
+            let! xs = skipChar ''' >>. parseExpr
+            return List
+                       [ Atom "quote"
+                         xs ]
         }
 
-    and parseListOrDotted: Parser<Ast.LispVal> =
+    let parseListOrDotted: Parser<LispVal> =
         parse {
-            let! x = pchar '(' >>. attempt parseList <|> parseDottedList .>> pchar ')'
-            return x }
+            do! skipChar '('
+            let! xs = attempt parseList <|> parseDottedList
+            do! skipChar ')'
+            return xs
+        }
+
+    do parseExprRef := choice [ parseListOrDotted; parseQuoted; parseNumber; parseAtom; parseString ]
 
     let readExpr (input: string): string =
         match run parseExpr input with
