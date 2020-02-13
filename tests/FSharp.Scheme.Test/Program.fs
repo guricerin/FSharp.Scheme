@@ -9,7 +9,7 @@ let tests =
         Expect.equal subject "Hello World" "The strings should equal"
     }
 
-[<Tests>]
+// [<Tests>]
 let failTest = test "not tested" { Expect.equal 1 2 "fail" }
 
 let config = { FsCheckConfig.defaultConfig with maxTest = 200 }

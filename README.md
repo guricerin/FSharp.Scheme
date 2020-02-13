@@ -1,6 +1,14 @@
 # FSharp.Scheme
 Scheme Interpreter Implementation with F#
 
+## Reference
+
+[48時間でSchemeを書こう](https://ja.wikibooks.org/wiki/48%E6%99%82%E9%96%93%E3%81%A7Scheme%E3%82%92%E6%9B%B8%E3%81%93%E3%81%86)
+
+## Thanks
+
+https://github.com/wraikny/FsTemplate
+
 ## CI Status
 |||
 :---|:---
@@ -25,7 +33,7 @@ $ dotnet fake build
 
 ## Run
 ```shell
-$ dotnet run --project src/SampleApp [-c {Debug|Release}]
+$ dotnet run -p src/FSharp.Scheme.Repl [-c {Debug|Release}]
 ```
 
 ## Tests
@@ -72,13 +80,6 @@ $ echo -e 'FSharp.Core\nExpecto\nExpecto.FsCheck' > tests/SampleTest/paket.refer
 $ paket install # Add reference of Paket to .fsproj file
 ```
 and then, Add **Project Name** to [build.fsx](/build.fsx).
-
-## Solution
-```shell
-$ dotnet new sln # Create Solution File
-$ dotnet sln add src/SampleApp
-$ dotnet sln add src/SampleLib
-```
 
 ## Tool Update
 ```shell
