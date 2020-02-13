@@ -75,8 +75,7 @@ module Parsing =
 
     and parseQuoted: Parser<Ast.LispVal> =
         parse {
-            do pchar ''' |> ignore
-            let! x = parseExpr
+            let! x = pchar ''' >>. parseExpr
             return Ast.List
                        [ Ast.Atom "quote"
                          x ]
@@ -84,11 +83,8 @@ module Parsing =
 
     and parseListOrDotted: Parser<Ast.LispVal> =
         parse {
-            do pchar ''' |> ignore
-            let! x = attempt parseList <|> parseDottedList
-            do pchar ''' |> ignore
-            return x
-        }
+            let! x = pchar '(' >>. attempt parseList <|> parseDottedList .>> pchar ')'
+            return x }
 
     let readExpr (input: string): string =
         match run parseExpr input with
