@@ -9,4 +9,5 @@ module Ast =
         | Integer of int
         | Float of float
         | String of string
+        | Character of char
         | Bool of bool

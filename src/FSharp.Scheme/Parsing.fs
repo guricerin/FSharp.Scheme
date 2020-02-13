@@ -41,6 +41,11 @@ module Parsing =
             let! x = manyChars (nonEscapedChar <|> escapedChar) |> between (pchar '"') (pchar '"')
             return Ast.String x }
 
+    let parseCharcter: Parser<Ast.LispVal> =
+        parse {
+            let! x = (nonEscapedChar <|> escapedChar) |> between (pchar ''') (pchar ''')
+            return Ast.Character x }
+
     let numberFormat =
         NumberLiteralOptions.AllowMinusSign ||| NumberLiteralOptions.AllowFraction
         ||| NumberLiteralOptions.AllowExponent
@@ -53,7 +58,7 @@ module Parsing =
             return x
         }
 
-    let parseExpr: Parser<Ast.LispVal> = parseAtom <|> parseString <|> parseNumber
+    let parseExpr: Parser<Ast.LispVal> = parseAtom <|> parseString <|> parseCharcter <|> parseNumber
 
     let readExpr (input: string): string =
         match run parseExpr input with
