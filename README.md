@@ -1,40 +1,16 @@
-# FsTemplate
-Template for F# project, distributed under [MIT License](/LICENSE)
-
-## Usage
-1. Click the above [**Use this Template**] button.
-2. **Clone** your regository
-    ```shell
-    $ git clone git@github.com:<OWNER>/<REPOSITORY>.git
-    ```
-
-3. Change **CI Badge** in **[README.md](/README.md)**
-    - Replace `wraikny/FsTemplate` to `<OWNER>/<REPOSITORY>`
-    - Set your own AppVeyor badge ID
-    - **If you don't use a CI service, comment out it from the below table**.
-
-
-4. Create project: **[Create Project](#Create-Project)**
+# FSharp.Scheme
+Scheme Interpreter Implementation with F#
 
 ## CI Status
 |||
 :---|:---
-|Github Actions|[![](https://github.com/wraikny/FsTemplate/workflows/CI/badge.svg)](https://github.com/wraikny/FsTemplate/actions?workflow=CI)|
-|Travis CI|[![](https://travis-ci.org/wraikny/FsTemplate.svg?branch=master)](https://travis-ci.org/wraikny/FsTemplate)|
-|AppVeyor|[![](https://ci.appveyor.com/api/projects/status/5vtyb8v9twdpteb6?svg=true)](https://ci.appveyor.com/project/wraikny/FsTemplate)|
+|Github Actions|[![](https://github.com/guricerin/FSharp.Scheme/workflows/CI/badge.svg)](https://github.com/guricerin/FSharp.Scheme/actions?workflow=CI)|
+<!-- |Travis CI|[![](https://travis-ci.org/guricerin/FSharp.Scheme.svg?branch=master)](https://travis-ci.org/guricerin/FSharp.Scheme)|
+|AppVeyor|[![](https://ci.appveyor.com/api/projects/status/5vtyb8v9twdpteb6?svg=true)](https://ci.appveyor.com/project/guricerin/FSharp.Scheme)| -->
 
 <!---
 comment out in Markdown.
 --->
-
-## Requirements
-.NET Core 3.0  
-https://dotnet.microsoft.com/download  
-
-```shell
-$ dotnet --version
-3.0.100
-```
 
 ## Restoring after Clone
 ```shell
@@ -110,7 +86,3 @@ $ dotnet tool update fake-cli
 $ dotnet tool update paket
 ```
 and then, commit [.config/dotnet-tools.json](/.config/dotnet-tools.json).
-
-## Link
-- [Paket（.NETのパッケージマネージャー）とFAKE（F#のMake）について - anti scroll](https://tategakibunko.hatenablog.com/entry/2019/07/09/123655)
-- [.NET Core 3.0 の新機能 #ローカルツール - Microsoft Docs](https://docs.microsoft.com/ja-jp/dotnet/core/whats-new/dotnet-core-3-0#local-tools)

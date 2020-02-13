@@ -6,10 +6,14 @@ NUGET
     Expecto.FsCheck (8.12)
       Expecto (>= 8.12) - restriction: || (>= net461) (>= netstandard2.0)
       FsCheck (>= 2.13) - restriction: || (>= net461) (>= netstandard2.0)
+    FParsec (1.1.1)
+      FSharp.Core (>= 4.3.4) - restriction: || (>= net45) (>= netstandard2.0)
+      System.ValueTuple (>= 4.4) - restriction: >= net45
     FsCheck (2.14) - restriction: || (>= net461) (>= netstandard2.0)
       FSharp.Core (>= 4.2.3) - restriction: || (>= net452) (>= netstandard1.6)
     FSharp.Core (4.7)
     Mono.Cecil (0.11) - restriction: || (>= net461) (>= netstandard2.0)
+    System.ValueTuple (4.5) - restriction: >= net45
 
 GROUP Build
 STORAGE: NONE
