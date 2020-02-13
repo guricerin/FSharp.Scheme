@@ -10,7 +10,7 @@ module Parsing =
 
     let symbol: Parser<char> = anyOf "!#$%&|*+-/:<=>?@^_~"
 
-    let myspaces = spaces1
+    let blank = spaces1
 
     let nonEscapedChar: Parser<char> = noneOf [ '\\'; '"' ]
 
@@ -58,7 +58,37 @@ module Parsing =
             return x
         }
 
-    let parseExpr: Parser<Ast.LispVal> = parseAtom <|> parseString <|> parseCharcter <|> parseNumber
+    let rec parseExpr: Parser<Ast.LispVal> =
+        choice [ parseAtom; parseString; parseCharcter; parseNumber; parseQuoted; parseListOrDotted ]
+
+    // fixme stack overflow
+    and parseList: Parser<Ast.LispVal> =
+        parse {
+            let! x = sepBy parseExpr blank
+            return Ast.List x }
+
+    and parseDottedList: Parser<Ast.LispVal> =
+        parse {
+            let! head = sepEndBy parseExpr blank
+            let! tail = pchar '.' >>. blank >>. parseExpr
+            return Ast.DottedList(head, tail) }
+
+    and parseQuoted: Parser<Ast.LispVal> =
+        parse {
+            do pchar ''' |> ignore
+            let! x = parseExpr
+            return Ast.List
+                       [ Ast.Atom "quote"
+                         x ]
+        }
+
+    and parseListOrDotted: Parser<Ast.LispVal> =
+        parse {
+            do pchar ''' |> ignore
+            let! x = attempt parseList <|> parseDottedList
+            do pchar ''' |> ignore
+            return x
+        }
 
     let readExpr (input: string): string =
         match run parseExpr input with
