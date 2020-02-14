@@ -1,4 +1,4 @@
-namespace FSharp.Scheme.Core.Ast
+namespace FSharp.Scheme.Core
 
 module Ast =
     open System

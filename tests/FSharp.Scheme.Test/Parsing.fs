@@ -3,13 +3,12 @@ module FSharp.Scheme.Test.Parsing
 open System
 open Expecto
 open FParsec
-open FSharp.Scheme.Core.Ast.Ast
+open FSharp.Scheme.Core.Ast
 open FSharp.Scheme.Core.Parsing
-open Parsing
 
 module ParsingTest =
 
-    let config = { FsCheckConfig.defaultConfig with maxTest = 200 }
+    let config = { FsCheckConfig.defaultConfig with maxTest = 100 }
 
     let parseTest input expect =
         // let actual = run parseExpr input

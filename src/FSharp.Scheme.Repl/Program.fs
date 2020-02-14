@@ -1,8 +1,7 @@
 ﻿module FSharp.Scheme.Repl
 
 open System
-open FSharp.Scheme.Core.Parsing
-open FSharp.Scheme.Core.Eval
+open FSharp.Scheme.Core
 
 let rec loop() =
     printf "\n> "

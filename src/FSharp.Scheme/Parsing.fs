@@ -1,11 +1,10 @@
-namespace FSharp.Scheme.Core.Parsing
+namespace FSharp.Scheme.Core
 
 open System
 
 module Parsing =
     open FParsec
     open FSharp.Scheme.Core.Ast
-    open Ast
 
     type Parser<'a> = Parser<'a, unit>
 

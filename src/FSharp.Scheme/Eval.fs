@@ -1,9 +1,8 @@
-namespace FSharp.Scheme.Core.Eval
+namespace FSharp.Scheme.Core
 
 module Eval =
     open System
     open FSharp.Scheme.Core.Ast
-    open Ast
 
     /// LispValをintに型変換
     let rec unpackNum lv =
