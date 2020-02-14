@@ -49,10 +49,10 @@ module ParsingTest =
 
         testPropertyWithConfig config "parse single float" <| f
 
-    let tryParse input =
-        match run parseExpr input with
-        | Success(res, _, _) -> res
-        | Failure(msg, _, _) -> failwithf "%s" msg
+    let tryParse input = parseBy input
+    // match run parseExpr input with
+    // | Success(res, _, _) -> res
+    // | Failure(msg, _, _) -> failwithf "%s" msg
 
     [<Tests>]
     let ``parse quote symbol`` =

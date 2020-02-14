@@ -89,7 +89,10 @@ module Parsing =
 
     let readExpr (input: string): string =
         match run (spaces >>. parseExpr .>> eof) input with
-        | Success(res, _, _) -> sprintf "Found Value: %A" res
+        | Success(res, _, _) ->
+            let a = sprintf "Found Value: %s" (res |> LispVal.toString)
+            let b = sprintf "Type: %A" res
+            sprintf "%s\n%s" a b
         | Failure(msg, _, _) -> sprintf "No match: %s" msg
 
     let parseBy (input: string): LispVal =
