@@ -66,12 +66,12 @@ module Parsing =
     let parseDottedList: Parser<LispVal> =
         parse {
             let! head = sepEndBy parseExpr spaces
-            let! tail = pchar '.' >>. spaces1 >>. parseExpr
+            let! tail = pchar '.' >>. spaces >>. parseExpr
             return DottedList(head, tail) }
 
     let parseQuoted: Parser<LispVal> =
         parse {
-            let! xs = skipChar ''' >>. parseExpr
+            let! xs = pchar ''' >>. parseExpr
             return List
                        [ Atom "quote"
                          xs ]
@@ -79,7 +79,7 @@ module Parsing =
 
     let parseListOrDotted: Parser<LispVal> =
         parse {
-            do! skipChar '('
+            do! pchar '(' >>. spaces
             let! xs = attempt parseList <|> parseDottedList
             do! skipChar ')'
             return xs
@@ -88,6 +88,11 @@ module Parsing =
     do parseExprRef := choice [ parseListOrDotted; parseQuoted; parseNumber; parseAtom; parseString ]
 
     let readExpr (input: string): string =
-        match run parseExpr input with
+        match run (spaces >>. parseExpr .>> eof) input with
         | Success(res, _, _) -> sprintf "Found Value: %A" res
         | Failure(msg, _, _) -> sprintf "No match: %s" msg
+
+    let parseBy (input: string): LispVal =
+        match run (spaces >>. parseExpr .>> eof) input with
+        | Success(res, _, _) -> res
+        | Failure(msg, _, _) -> failwithf "%s" msg

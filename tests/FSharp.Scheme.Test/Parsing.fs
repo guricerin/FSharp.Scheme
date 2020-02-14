@@ -12,10 +12,12 @@ module ParsingTest =
     let config = { FsCheckConfig.defaultConfig with maxTest = 200 }
 
     let parseTest input expect =
-        let actual = run parseExpr input
-        match actual with
-        | Success(res, _, _) -> res = expect
-        | Failure(msg, _, _) -> failwithf "%s" msg
+        // let actual = run parseExpr input
+        // match actual with
+        // | Success(res, _, _) -> res = expect
+        // | Failure(msg, _, _) -> failwithf "%s" msg
+        let actual = parseBy input
+        actual = expect
 
     [<Tests>]
     let ``parse single integer`` =
@@ -74,6 +76,38 @@ module ParsingTest =
         }
 
     [<Tests>]
+    let ``parse nested list`` =
+        test "parse nested list" {
+            let expect =
+                List
+                    ([ Atom "a"
+                       Atom "test" ])
+            Expect.equal (parseBy "(a test)") expect "(a test)"
+            let expect =
+                List
+                    [ Atom "a"
+                      List [ Atom "nested" ]
+                      Atom "test" ]
+            Expect.equal (parseBy "(a (nested) test)") expect "(a (nested) test)"
+            let expect =
+                List
+                    [ Atom "a"
+                      DottedList([ Atom "dotted" ], Atom "list")
+                      Atom "test" ]
+            Expect.equal (parseBy "(a (dotted . list) test)") expect "(a (dotted . list) test)"
+            let expect =
+                List
+                    [ Atom "a"
+                      List
+                          [ Atom "quote"
+                            List
+                                [ Atom "quoted"
+                                  DottedList([ Atom "dotted" ], Atom "list") ] ]
+                      Atom "test" ]
+            Expect.equal (parseBy "(a '(quoted (dotted . list)) test)") expect "(a '(quoted (dotted . list)) test)"
+        }
+
+    [<Tests>]
     let ``parse dotted list`` =
         test "parse dotted list" {
             let expect = DottedList([ Integer 1 ], Integer 2)
@@ -93,9 +127,9 @@ module ParsingTest =
                     [ Atom "+"
                       Integer 1
                       Integer 2 ]
-            Expect.equal (tryParse "(+ 1 2)") expect "(+ 1 2)"
-            Expect.equal (tryParse "(+   1     2)") expect "(+   1     2)"
-            Expect.equal (tryParse "(+ 1 2 )") expect "(+ 1 2 )"
-            Expect.equal (tryParse "( + 1 2)") expect "( + 1 2)"
-            Expect.equal (tryParse "( + 1 2 )") expect "( + 1 2 )"
+            Expect.equal (parseBy "(+ 1 2)") expect "(+ 1 2)"
+            Expect.equal (parseBy "(+   1     2)") expect "(+   1     2)"
+            Expect.equal (parseBy "( + 1 2)") expect "( + 1 2)"
+            Expect.equal (parseBy "(+ 1 2 )") expect "(+ 1 2 )"
+            Expect.equal (parseBy "( + 1 2 )") expect "( + 1 2 )"
         }
