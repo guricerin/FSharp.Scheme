@@ -4,7 +4,7 @@ open System
 open FSharp.Scheme.Core.Parsing
 
 let rec loop() =
-    printf "> "
+    printf "\n> "
     stdin.ReadLine()
     |> Parsing.readExpr
     |> printfn "%s"

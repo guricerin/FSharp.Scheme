@@ -1,8 +1,6 @@
-﻿module FSharp.Scheme.Test
+﻿open Expecto
 
-open Expecto
-
-[<Tests>]
+// [<Tests>]
 let tests =
     test "simple test" {
         let subject = "Hello World"
@@ -14,7 +12,7 @@ let failTest = test "not tested" { Expect.equal 1 2 "fail" }
 
 let config = { FsCheckConfig.defaultConfig with maxTest = 200 }
 
-[<Tests>]
+// [<Tests>]
 let properties =
     testList "FsCheck"
         [ testProperty "add" <| fun a b -> a + b = b + a

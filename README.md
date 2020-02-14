@@ -3,17 +3,19 @@ Scheme Interpreter Implementation with F#
 
 ## Reference
 
-[48時間でSchemeを書こう](https://ja.wikibooks.org/wiki/48%E6%99%82%E9%96%93%E3%81%A7Scheme%E3%82%92%E6%9B%B8%E3%81%93%E3%81%86)
+* [48時間でSchemeを書こう](https://ja.wikibooks.org/wiki/48%E6%99%82%E9%96%93%E3%81%A7Scheme%E3%82%92%E6%9B%B8%E3%81%93%E3%81%86)
+* [FParsecでJSONパーサーを書いてみる話](http://bleis-tift.hatenablog.com/entry/json-parser-using-fparsec)
+* https://github.com/relentless/Flint
 
 ## Thanks
 
 https://github.com/wraikny/FsTemplate
 
-## CI Status
+<!-- ## CI Status
 |||
 :---|:---
 |Github Actions|[![](https://github.com/guricerin/FSharp.Scheme/workflows/CI/badge.svg)](https://github.com/guricerin/FSharp.Scheme/actions?workflow=CI)|
-<!-- |Travis CI|[![](https://travis-ci.org/guricerin/FSharp.Scheme.svg?branch=master)](https://travis-ci.org/guricerin/FSharp.Scheme)|
+|Travis CI|[![](https://travis-ci.org/guricerin/FSharp.Scheme.svg?branch=master)](https://travis-ci.org/guricerin/FSharp.Scheme)|
 |AppVeyor|[![](https://ci.appveyor.com/api/projects/status/5vtyb8v9twdpteb6?svg=true)](https://ci.appveyor.com/project/guricerin/FSharp.Scheme)| -->
 
 <!---
