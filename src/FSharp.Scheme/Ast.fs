@@ -14,6 +14,7 @@ module Ast =
 
     [<RequireQualifiedAccess>]
     module LispVal =
+
         let rec toString lv =
             match lv with
             | String s -> sprintf "\"%s\"" s
@@ -29,3 +30,36 @@ module Ast =
             contents
             |> List.map toString
             |> fun xs -> String.Join(" ", xs)
+
+        let isAtom =
+            function
+            | Atom _ -> true
+            | _ -> false
+
+        let isString =
+            function
+            | String _ -> true
+            | _ -> false
+
+        let isInteger =
+            function
+            | Integer _ -> true
+            | _ -> false
+
+        let isFloat =
+            function
+            | Float _ -> true
+            | _ -> false
+
+        let isNumber lv = isInteger lv || isFloat lv
+
+        let isBool =
+            function
+            | Bool _ -> true
+            | _ -> false
+
+        let isList =
+            function
+            | List _
+            | DottedList _ -> true
+            | _ -> false

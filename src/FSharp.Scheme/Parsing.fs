@@ -87,13 +87,13 @@ module Parsing =
 
     do parseExprRef := choice [ parseListOrDotted; parseQuoted; parseNumber; parseAtom; parseString ]
 
-    let readExpr (input: string): string =
+    let readExpr (input: string): LispVal =
         match run (spaces >>. parseExpr .>> eof) input with
-        | Success(res, _, _) ->
-            let a = sprintf "Found Value: %s" (res |> LispVal.toString)
-            let b = sprintf "Type: %A" res
-            sprintf "%s\n%s" a b
-        | Failure(msg, _, _) -> sprintf "No match: %s" msg
+        | Success(res, _, _) -> res
+        // let a = sprintf "Found Value: %s" (res |> LispVal.toString)
+        // let b = sprintf "Type: %A" res
+        // sprintf "%s\n%s" a b
+        | Failure(msg, _, _) -> sprintf "No match: %s" msg |> String
 
     let parseBy (input: string): LispVal =
         match run (spaces >>. parseExpr .>> eof) input with
