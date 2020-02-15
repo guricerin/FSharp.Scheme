@@ -4,7 +4,8 @@ Scheme Interpreter Implementation with F#
 ## Reference
 
 * [48時間でSchemeを書こう](https://ja.wikibooks.org/wiki/48%E6%99%82%E9%96%93%E3%81%A7Scheme%E3%82%92%E6%9B%B8%E3%81%93%E3%81%86)
-* [FParsecでJSONパーサーを書いてみる話](http://bleis-tift.hatenablog.com/entry/json-parser-using-fparsec)
+* [ぐるぐる～ - FParsecでJSONパーサーを書いてみる話](http://bleis-tift.hatenablog.com/entry/json-parser-using-fparsec)
+* [Arantium Maestum - OCamlで48 Hour Schemeをやってみる](http://zehnpaard.hatenablog.com/entry/2019/06/15/223016)
 * https://github.com/relentless/Flint
 
 ## Thanks

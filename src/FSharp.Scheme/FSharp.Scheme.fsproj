@@ -5,6 +5,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Ast.fs" />
+    <Compile Include="Errors.fs" />
     <Compile Include="Parsing.fs" />
     <Compile Include="Eval.fs" />
   </ItemGroup>

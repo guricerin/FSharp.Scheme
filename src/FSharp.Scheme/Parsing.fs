@@ -5,6 +5,7 @@ open System
 module Parsing =
     open FParsec
     open FSharp.Scheme.Core.Ast
+    open FSharp.Scheme.Core.Errors
 
     type Parser<'a> = Parser<'a, unit>
 
@@ -89,10 +90,7 @@ module Parsing =
     let readExpr (input: string): LispVal =
         match run (spaces >>. parseExpr .>> eof) input with
         | Success(res, _, _) -> res
-        // let a = sprintf "Found Value: %s" (res |> LispVal.toString)
-        // let b = sprintf "Type: %A" res
-        // sprintf "%s\n%s" a b
-        | Failure(msg, _, _) -> sprintf "No match: %s" msg |> String
+        | Failure(msg, _, _) -> raise <| ParserException(msg)
 
     let parseBy (input: string): LispVal =
         match run (spaces >>. parseExpr .>> eof) input with

@@ -2,13 +2,20 @@
 
 open System
 open FSharp.Scheme.Core
+open FSharp.Scheme.Core.Errors
 
 let rec loop() =
-    printf "\n> "
-    stdin.ReadLine()
-    |> Parsing.readExpr
-    |> Eval.eval
-    |> printfn "%A"
+    printf "\nLisp> "
+    let input = stdin.ReadLine()
+    try
+        input
+        |> Parsing.readExpr
+        |> Eval.eval
+        |> printfn "%A"
+    with ex ->
+        ex
+        |> LispError.toString
+        |> printfn "%s"
     loop()
 
 [<EntryPoint>]

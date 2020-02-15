@@ -3,6 +3,7 @@ namespace FSharp.Scheme.Core
 module Eval =
     open System
     open FSharp.Scheme.Core.Ast
+    open FSharp.Scheme.Core.Errors
 
     /// LispValをintに型変換
     let rec unpackNum lv =
@@ -20,10 +21,14 @@ module Eval =
 
     /// 二項演算をfold
     let numericBinop (op: int -> int -> int) (args: LispVal list) =
-        args
-        |> List.map unpackNum
-        |> List.reduce op
-        |> Integer
+        match args with
+        | [] -> NumArgsException(2, [ String "zero arg" ]) |> raise
+        | [ x ] -> NumArgsException(2, [ x ]) |> raise
+        | _ ->
+            args
+            |> List.map unpackNum
+            |> List.reduce op
+            |> Integer
 
     let inline internal rem x y =
         let zero = LanguagePrimitives.GenericZero
@@ -47,7 +52,7 @@ module Eval =
     let apply (func: string) (args: LispVal list): LispVal =
         match Map.tryFind func primitives with
         | Some f -> f args
-        | None -> Bool false
+        | None -> NotFunctionException("Unrecognized primitive function args", func) |> raise
 
     let rec eval lv =
         match lv with
@@ -60,3 +65,4 @@ module Eval =
             args
             |> List.map eval
             |> apply func
+        | _ -> BadSpecialFormException("Unrecognized special form", lv) |> raise
