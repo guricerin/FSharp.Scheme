@@ -86,6 +86,10 @@ module Eval =
         | Float _
         | Bool _ -> x
         | List [ Atom "quote"; ls ] -> ls // クォート外し
+        | List [ Atom "if"; pred; conseq; alt ] ->
+            match eval pred with
+            | Bool false -> eval alt
+            | _ -> eval conseq
         | List(Atom func :: args) ->
             args
             |> List.map eval

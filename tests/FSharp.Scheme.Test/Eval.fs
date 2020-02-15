@@ -48,3 +48,14 @@ module EvalTest =
             let expect = Bool true
             Expect.equal (tryPE input) expect input
         }
+
+    [<Tests>]
+    let ``eval if`` =
+        test "eval if" {
+            let input = "(if (> 2 3) \"no\" \"yes\")"
+            let expect = String "yes"
+            Expect.equal (tryPE input) expect input
+            let input = "(if (= 3 3) (+ 2 3 (- 5 1)) \"unequal\")"
+            let expect = Integer 9
+            Expect.equal (tryPE input) expect input
+        }
