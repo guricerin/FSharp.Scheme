@@ -3,6 +3,7 @@ namespace FSharp.Scheme.Core
 module Eval =
     open System
     open FSharp.Scheme.Core.Ast
+    open FSharp.Scheme.Core.Env
     open FSharp.Scheme.Core.Errors
 
     /// LispValをintに型変換
@@ -142,20 +143,29 @@ module Eval =
         | Some f -> f args
         | None -> raise <| NotFunctionException("Unrecognized primitive function args", func)
 
-    let rec eval (x: LispVal): LispVal =
+    let rec eval (env: Env) (x: LispVal): LispVal =
         match x with
         | String _
         | Integer _
         | Float _
         | Bool _ -> x
+        | Atom id -> Env.getVar env id
         | List [ Atom "quote"; ls ] -> ls // クォート外し
         | List [ Atom "if"; pred; conseq; alt ] ->
-            match eval pred with
-            | Bool true -> eval conseq
-            | Bool false -> eval alt
+            match eval env pred with
+            | Bool true -> eval env conseq
+            | Bool false -> eval env alt
             | _ -> raise <| BadSpecialFormException("if form should take boolean prediction", x)
+        | List [ Atom "set!"; Atom var; form ] ->
+            form
+            |> eval env
+            |> Env.setVar env var
+        | List [ Atom "define"; Atom var; form ] ->
+            form
+            |> eval env
+            |> Env.defineVar env var
         | List(Atom func :: args) ->
             args
-            |> List.map eval
+            |> List.map (eval env)
             |> apply func
         | _ -> raise <| BadSpecialFormException("Unrecognized special form", x)

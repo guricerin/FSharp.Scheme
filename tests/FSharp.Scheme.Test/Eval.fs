@@ -4,6 +4,7 @@ open System
 open Expecto
 open FParsec
 open FSharp.Scheme.Core.Ast
+open FSharp.Scheme.Core.Env
 open FSharp.Scheme.Core.Parsing
 open FSharp.Scheme.Core.Eval
 
@@ -14,7 +15,9 @@ module EvalTest =
         | Success(res, _, _) -> res
         | Failure(msg, _, _) -> failwithf "%s" msg
 
-    let tryPE = tryParse >> eval
+    let env = Env.init
+
+    let tryPE = tryParse >> eval env
 
     [<Tests>]
     let ``eval int`` =
@@ -87,6 +90,35 @@ module EvalTest =
             let expect = "#t"
             Expect.equal (tryPES input) expect input
             let input = "(eqv? 'atom 'atom)"
+            let expect = "#t"
+            Expect.equal (tryPES input) expect input
+        }
+
+    [<Tests>]
+    let ``define`` =
+        let env = Env.init
+
+        let tryPES =
+            tryParse
+            >> eval env
+            >> LispVal.toString
+        test "define" {
+            let input = "(define x 3)"
+            let expect = "3"
+            Expect.equal (tryPES input) expect input
+            let input = "(+ x 2)"
+            let expect = "5"
+            Expect.equal (tryPES input) expect input
+            let input = "(define y 5)"
+            let expect = "5"
+            Expect.equal (tryPES input) expect input
+            let input = "(+ x (- y 2))"
+            let expect = "6"
+            Expect.equal (tryPES input) expect input
+            let input = "(define str  \"A string\")"
+            let expect = "\"A string\""
+            Expect.equal (tryPES input) expect input
+            let input = "(string<? str \"The string\")"
             let expect = "#t"
             Expect.equal (tryPES input) expect input
         }
