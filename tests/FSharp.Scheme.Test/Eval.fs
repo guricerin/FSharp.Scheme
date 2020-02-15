@@ -59,3 +59,34 @@ module EvalTest =
             let expect = Integer 9
             Expect.equal (tryPE input) expect input
         }
+
+    let tryPES = tryPE >> LispVal.toString
+
+    [<Tests>]
+    let ``eval list operation`` =
+        test "eval list operation" {
+            let input = "(cdr '(a simple test))"
+            let expect = "(simple test)"
+            Expect.equal (tryPES input) expect input
+            let input = "(car (cdr '(a simple test)))"
+            let expect = "simple"
+            Expect.equal (tryPES input) expect input
+            let input = "(car '((this is) a test))"
+            let expect = "(this is)"
+            Expect.equal (tryPES input) expect input
+            let input = "(cons '(this is) 'test)"
+            let expect = "((this is) . test)"
+            Expect.equal (tryPES input) expect input
+            let input = "(cons '(this is) '())"
+            let expect = "((this is))"
+            Expect.equal (tryPES input) expect input
+            let input = "(eqv? 1 3)"
+            let expect = "#f"
+            Expect.equal (tryPES input) expect input
+            let input = "(eqv? 3 3)"
+            let expect = "#t"
+            Expect.equal (tryPES input) expect input
+            let input = "(eqv? 'atom 'atom)"
+            let expect = "#t"
+            Expect.equal (tryPES input) expect input
+        }

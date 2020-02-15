@@ -87,17 +87,28 @@ module Eval =
             let r = List(ys @ [ y ])
             eqvCore [ l; r ]
         | [ List arg1; List arg2 ] -> List.length arg1 = List.length arg2 && eqvPair arg1 arg2
-        | [ _; _ ] -> false
+        | [ _; _ ] -> false // 型が違う
         | _ -> raise <| NumArgsException(2, List.length ls, ls)
 
     and internal eqvPair xs ys =
         match xs, ys with
-        | [], [] -> true
+        | [], [] -> true // 各要素が等しく、要素数も等しい
         | x :: xs, y :: ys ->
             if eqvCore [ x; y ] then eqvPair xs ys else false
         | _ -> false
 
     let eqv x = Bool(eqvCore x)
+
+    let rec equal x =
+        let comp op x y =
+            try
+                op x = op y
+            with TypeMismatchException(_) -> false
+        match x with
+        | [ xs; ys ] ->
+            let b = eqvCore x || comp unpackInt xs ys || comp unpackStr xs ys || comp unpackBool xs ys
+            Bool b
+        | _ -> raise <| NumArgsException(2, List.length x, x)
 
     let primitives =
         Map.empty
@@ -124,6 +135,7 @@ module Eval =
         |> Map.add "cons" cons
         |> Map.add "eq?" eqv
         |> Map.add "eqv?" eqv
+        |> Map.add "equal?" equal
 
     let apply (func: string) (args: LispVal list): LispVal =
         match Map.tryFind func primitives with
@@ -139,8 +151,9 @@ module Eval =
         | List [ Atom "quote"; ls ] -> ls // クォート外し
         | List [ Atom "if"; pred; conseq; alt ] ->
             match eval pred with
+            | Bool true -> eval conseq
             | Bool false -> eval alt
-            | _ -> eval conseq
+            | _ -> raise <| BadSpecialFormException("if form should take boolean prediction", x)
         | List(Atom func :: args) ->
             args
             |> List.map eval
