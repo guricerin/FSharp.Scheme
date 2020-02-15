@@ -3,7 +3,7 @@ namespace FSharp.Scheme.Core
 module Errors =
     open FSharp.Scheme.Core.Ast
 
-    exception NumArgsException of int * LispVal list
+    exception NumArgsException of expected: int * actual: int * LispVal list
 
     exception TypeMismatchException of string * LispVal
 
@@ -28,8 +28,9 @@ module Errors =
                 sprintf "BadSpecialFormException:\n%s: %s" msg (LispVal.toString form)
             | NotFunctionException(msg, func) ->
                 sprintf "NotFunctionException:\n%s: %s" msg func
-            | NumArgsException(expected, found) ->
-                sprintf "NumArgsException:\nExpected %d args: found values %s" expected (LispVal.unwordsList found)
+            | NumArgsException(expected, actual, found) ->
+                sprintf "NumArgsException:\nExpected %d args: Actual %d, values %s" expected actual
+                    (LispVal.unwordsList found)
             | TypeMismatchException(expected, found) ->
                 sprintf "TypeMismatchException:\nexpected %s, found %s" expected (LispVal.toString found)
             | ParserException(msg) ->

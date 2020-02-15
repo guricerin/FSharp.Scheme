@@ -28,3 +28,23 @@ module EvalTest =
             let expect = Integer 3
             Expect.equal (tryPE "(- (+ 4 6 3) 3 5 2)") expect "(- (+ 4 6 3) 3 5 2)"
         }
+
+    [<Tests>]
+    let ``eval bool`` =
+        test "eval bool" {
+            let input = "(< 2 3)"
+            let expect = Bool true
+            Expect.equal (tryPE input) expect input
+            let input = "(> 2 3)"
+            let expect = Bool false
+            Expect.equal (tryPE input) expect input
+            let input = "(>= 3 3)"
+            let expect = Bool true
+            Expect.equal (tryPE input) expect input
+            let input = "(string=? \"test\" \"test\")"
+            let expect = Bool true
+            Expect.equal (tryPE input) expect input
+            let input = "(string<? \"abc\" \"bba\")"
+            let expect = Bool true
+            Expect.equal (tryPE input) expect input
+        }

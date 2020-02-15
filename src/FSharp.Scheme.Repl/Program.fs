@@ -2,6 +2,7 @@
 
 open System
 open FSharp.Scheme.Core
+open FSharp.Scheme.Core.Ast
 open FSharp.Scheme.Core.Errors
 
 let rec loop() =
@@ -11,7 +12,8 @@ let rec loop() =
         input
         |> Parsing.readExpr
         |> Eval.eval
-        |> printfn "%A"
+        |> LispVal.toString
+        |> printfn "%s"
     with ex ->
         ex
         |> LispError.toString
