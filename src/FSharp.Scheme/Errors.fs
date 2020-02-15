@@ -29,10 +29,10 @@ module Errors =
             | NotFunctionException(msg, func) ->
                 sprintf "NotFunctionException:\n%s: %s" msg func
             | NumArgsException(expected, actual, found) ->
-                sprintf "NumArgsException:\nExpected %d args: Actual %d, values %s" expected actual
+                sprintf "NumArgsException:\nExpected %d args: Actual: %d, values: %s" expected actual
                     (LispVal.unwordsList found)
             | TypeMismatchException(expected, found) ->
-                sprintf "TypeMismatchException:\nexpected %s, found %s" expected (LispVal.toString found)
+                sprintf "TypeMismatchException:\nexpected %s, found: %s" expected (LispVal.toString found)
             | ParserException(msg) ->
                 sprintf "ParserException:\n%s" msg
             | DefaultException(msg) ->

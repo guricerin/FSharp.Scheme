@@ -53,6 +53,52 @@ module Eval =
     let strBoolBinop = boolBinop unpackStr
     let boolBoolBinop = boolBinop unpackBool
 
+    let car (ls: LispVal list): LispVal =
+        match ls with
+        | [ List(x :: xs) ] -> x
+        | [ DottedList(x :: xs, _) ] -> x
+        | [ badarg ] -> raise <| TypeMismatchException("pair", badarg)
+        | _ -> raise <| NumArgsException(1, List.length ls, ls)
+
+    let cdr (ls: LispVal list): LispVal =
+        match ls with
+        | [ List(x :: xs) ] -> List xs
+        | [ DottedList([ xs ], x) ] -> x
+        | [ DottedList(_ :: xs, x) ] -> DottedList(xs, x)
+        | [ badarg ] -> raise <| TypeMismatchException("pair", badarg)
+        | _ -> raise <| NumArgsException(1, List.length ls, ls)
+
+    let cons (ls: LispVal list): LispVal =
+        match ls with
+        | [ x; List xs ] -> List(x :: xs)
+        | [ x; DottedList(head, last) ] -> DottedList(x :: head, last)
+        | [ x; y ] -> DottedList([ x ], y) // 2つの非リスト
+        | _ -> raise <| NumArgsException(2, List.length ls, ls)
+
+    let rec internal eqvCore (ls: LispVal list): bool =
+        match ls with
+        | [ Bool arg1; Bool arg2 ] -> arg1 = arg2
+        | [ Integer arg1; Integer arg2 ] -> arg1 = arg2
+        | [ Float arg1; Float arg2 ] -> arg1 = arg2
+        | [ String arg1; String arg2 ] -> arg1 = arg2
+        | [ Atom arg1; Atom arg2 ] -> arg1 = arg2
+        | [ DottedList(xs, x); DottedList(ys, y) ] ->
+            let l = List(xs @ [ x ])
+            let r = List(ys @ [ y ])
+            eqvCore [ l; r ]
+        | [ List arg1; List arg2 ] -> List.length arg1 = List.length arg2 && eqvPair arg1 arg2
+        | [ _; _ ] -> false
+        | _ -> raise <| NumArgsException(2, List.length ls, ls)
+
+    and internal eqvPair xs ys =
+        match xs, ys with
+        | [], [] -> true
+        | x :: xs, y :: ys ->
+            if eqvCore [ x; y ] then eqvPair xs ys else false
+        | _ -> false
+
+    let eqv x = Bool(eqvCore x)
+
     let primitives =
         Map.empty
         |> Map.add "+" (numericBinop (+))
@@ -73,6 +119,11 @@ module Eval =
         |> Map.add "string>?" (strBoolBinop (>))
         |> Map.add "string<=?" (strBoolBinop (<=))
         |> Map.add "string>=?" (strBoolBinop (>=))
+        |> Map.add "car" car
+        |> Map.add "cdr" cdr
+        |> Map.add "cons" cons
+        |> Map.add "eq?" eqv
+        |> Map.add "eqv?" eqv
 
     let apply (func: string) (args: LispVal list): LispVal =
         match Map.tryFind func primitives with
