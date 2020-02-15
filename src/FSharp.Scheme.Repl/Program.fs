@@ -33,6 +33,10 @@ let rec repl() =
 
 [<EntryPoint>]
 let main argv =
-    printfn "Welcom Debug Room"
-    repl()
+    match Array.length argv with
+    | 0 ->
+        printfn "Welcom Repl Room"
+        repl()
+    | 1 -> rep argv.[0]
+    | _ -> printfn "Program takes only 0 or 1 argument"
     0 // return an integer exit code
