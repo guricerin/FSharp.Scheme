@@ -5,9 +5,10 @@ open FSharp.Scheme.Core
 open FSharp.Scheme.Core.Ast
 open FSharp.Scheme.Core.Errors
 
-let rec loop() =
-    printf "\nLisp> "
-    let input = stdin.ReadLine()
+let printPrompt() =
+    printf "\nLisp>>> "
+
+let rep input =
     try
         input
         |> Parsing.readExpr
@@ -18,10 +19,20 @@ let rec loop() =
         ex
         |> LispError.toString
         |> printfn "%s"
-    loop()
+
+let rec repl() =
+    printPrompt()
+    match stdin.ReadLine() with
+    | "" -> repl()
+    | "quit" ->
+        printfn "good bye!"
+        ()
+    | input ->
+        rep input
+        repl()
 
 [<EntryPoint>]
 let main argv =
     printfn "Welcom Debug Room"
-    loop()
+    repl()
     0 // return an integer exit code
