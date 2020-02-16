@@ -11,7 +11,6 @@ module ParsingTest =
 
     let config = { FsCheckConfig.defaultConfig with maxTest = 100 }
 
-
     [<Tests>]
     let ``parse single integer`` =
         let parseTest input expect =

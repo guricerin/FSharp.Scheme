@@ -26,6 +26,8 @@ module Ast =
                     | Some(a) -> sprintf " . %s" a
                     | None -> ""
                 sprintf "(lambda (%s%s) ...)" param vararg
+            | PortIn _ -> "<IN port>"
+            | PortOut _ -> "<OUT port>"
 
         and unwordsList contents =
             contents

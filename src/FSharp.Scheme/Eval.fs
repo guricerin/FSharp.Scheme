@@ -6,6 +6,7 @@ module Eval =
     open FSharp.Scheme.Core.Ast
     open FSharp.Scheme.Core.Env
     open FSharp.Scheme.Core.Errors
+    open FSharp.Scheme.Core.Io
 
     let rec bindArgsCore param args (env: Env) =
         match param, args with
@@ -29,9 +30,9 @@ module Eval =
     let bindArgs (func: Func) args =
         let nparam, nargs = List.length func.param, List.length args
         match nparam <> nargs, func.vararg with
-        | true, None -> raise <| NumArgsException(nparam, nargs, args)
-        | false, Some varg -> bindVarargs func.param args varg func.closure
-        | false, None -> bindArgsCore func.param args func.closure
+        | true, _ -> raise <| NumArgsException(nparam, nargs, args)
+        | false, Some varg -> bindVarargs func.param args varg (Env.clone func.closure)
+        | false, None -> bindArgsCore func.param args (Env.clone func.closure)
 
     let initFunc param vararg body env =
         let deatom =
@@ -41,7 +42,7 @@ module Eval =
         { param = List.map deatom param
           vararg = vararg
           body = body
-          closure = Env.clone env }
+          closure = env }
         |> Func
 
     let rec eval (env: Env) (x: LispVal): LispVal =
@@ -72,6 +73,16 @@ module Eval =
         | List(Atom "lambda" :: List param :: body) -> initFunc param None body env
         | List(Atom "lambda" :: DottedList(param, Atom varg) :: body) -> initFunc param (Some varg) body env
         | List(Atom "lambda" :: Atom varg :: body) -> initFunc [] (Some varg) body env
+        | List [ Atom "load"; String filename ] ->
+            PortIn.load filename
+            |> List.map (eval env)
+            |> List.last
+        | List [ Atom "apply"; func; target ] ->
+            let func = eval env func
+            match eval env target with
+            | List args -> apply func args
+            | _ -> apply func [ target ]
+        | List(Atom "apply" :: func :: args)
         | List(func :: args) ->
             let func = eval env func
             let args = List.map (eval env) args
@@ -85,6 +96,5 @@ module Eval =
             let f = bindArgs func args |> eval
             func.body
             |> List.map f
-            |> List.rev
-            |> List.head
+            |> List.last
         | _ -> raise <| NotFunctionException("Non function", LispVal.toString func)

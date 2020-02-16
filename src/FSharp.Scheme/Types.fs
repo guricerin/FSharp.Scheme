@@ -1,6 +1,7 @@
 namespace FSharp.Scheme.Core
 
 module Types =
+    open System.IO
     open System.Collections.Generic
 
     type LispVal =
@@ -13,6 +14,8 @@ module Types =
         | Bool of bool
         | PrimitiveFunc of (LispVal list -> LispVal)
         | Func of Func
+        | PortIn of StreamReader
+        | PortOut of StreamWriter
 
     and Func =
         { param: string list
@@ -20,4 +23,4 @@ module Types =
           body: LispVal list
           closure: Env }
 
-    and Env = SortedDictionary<string, LispVal>
+    and Env = SortedDictionary<string, LispVal ref>

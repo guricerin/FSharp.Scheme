@@ -186,3 +186,27 @@ module EvalTest =
             let expect = "19"
             Expect.equal (tryPES input) expect input
         }
+
+    [<Tests>]
+    let ``mutual recursion`` =
+        let env = Env.init |> Primitives.load
+
+        let tryPES =
+            tryParse
+            >> eval env
+            >> LispVal.toString
+
+        test "mutual recursion" {
+            let input = "(define (f x) (set! y (+ x y)))"
+            let expect = "(lambda (x) ...)"
+            Expect.equal (tryPES input) expect input
+            let input = "(define y 10)"
+            let expect = "10"
+            Expect.equal (tryPES input) expect input
+            let input = "(f 5)"
+            let expect = "10"
+            Expect.equal (tryPES input) expect input
+            let input = "y"
+            let expect = "15"
+            Expect.equal (tryPES input) expect input
+        }

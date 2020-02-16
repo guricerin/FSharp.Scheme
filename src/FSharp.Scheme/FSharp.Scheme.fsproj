@@ -8,6 +8,7 @@
     <Compile Include="Ast.fs" />
     <Compile Include="Errors.fs" />
     <Compile Include="Parsing.fs" />
+    <Compile Include="Io.fs" />
     <Compile Include="Env.fs" />
     <Compile Include="Primitives.fs" />
     <Compile Include="Eval.fs" />

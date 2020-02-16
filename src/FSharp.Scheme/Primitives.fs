@@ -5,6 +5,7 @@ module Primitives =
     open FSharp.Scheme.Core.Types
     open FSharp.Scheme.Core.Env
     open FSharp.Scheme.Core.Errors
+    open FSharp.Scheme.Core.Io
 
     /// LispValをintに型変換
     let rec internal unpackInt x =
@@ -142,3 +143,11 @@ module Primitives =
             |> add "eq?" eqv
             |> add "eqv?" eqv
             |> add "equal?" equal
+            |> add "open-input-file" PortIn.init
+            |> add "open-output-file" PortOut.init
+            |> add "close-input-file" PortIn.close
+            |> add "close-output-file" PortOut.close
+            |> add "read" PortIn.readProc
+            |> add "write" PortOut.writeProc
+            |> add "read-contents" PortIn.readContents
+            |> add "read-all" PortIn.readAll

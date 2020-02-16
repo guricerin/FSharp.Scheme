@@ -15,20 +15,22 @@ module Env =
 
         let getVar (env: Env) (varname: string): LispVal =
             match env.TryGetValue(varname) with
-            | true, x -> x
+            | true, x -> !x
             | _ -> raise <| UnboundVarException("Getting an unbound variable", varname)
 
         let setVar (env: Env) (varname: string) (x: LispVal) =
-            match isBound env varname with
-            | true ->
-                env.[varname] <- x
+            match env.TryGetValue(varname) with
+            | true, oldx ->
+                oldx := x
+                env.[varname] <- ref x
                 x
-            | false -> raise <| UnboundVarException("Setting an unbound variable", varname)
+            | _ -> raise <| UnboundVarException("Setting an unbound variable", varname)
 
         let defineVar (env: Env) (varname: string) (x: LispVal) =
             match isBound env varname with
             | true -> setVar env varname x |> ignore
-            | false -> env.Add(varname, x)
+            | false -> env.Add(varname, ref x)
             x
 
-        let bindVars (env: Env) (bindings: (string * LispVal) list) = List.iter (fun (k, v) -> env.Add(k, v)) bindings
+        let bindVars (env: Env) (bindings: (string * LispVal) list) =
+            List.iter (fun (k, v) -> env.Add(k, ref v)) bindings
