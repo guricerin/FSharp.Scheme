@@ -20,8 +20,10 @@ module EvalTest =
 
     let env = Env.init |> Primitives.load
 
-    let tryPE = tryParse >> eval env
-    let tryPES = tryPE >> LispVal.toString
+    let tryPES =
+        tryParse
+        >> eval env
+        >> LispVal.toString
 
     [<Tests>]
     let ``eval int`` =
@@ -98,11 +100,11 @@ module EvalTest =
 
     [<Tests>]
     let ``define`` =
-        let env = Env.init |> Primitives.load
+        let envDefine = Env.init |> Primitives.load
 
         let tryPES =
             tryParse
-            >> eval env
+            >> eval envDefine
             >> LispVal.toString
         test "define" {
             let input = "(define x 3)"
@@ -127,11 +129,11 @@ module EvalTest =
 
     [<Tests>]
     let ``define func`` =
-        let env = Env.init |> Primitives.load
+        let envDefineFunc = Env.init |> Primitives.load
 
         let tryPES =
             tryParse
-            >> eval env
+            >> eval envDefineFunc
             >> LispVal.toString
 
         test "define func" {
@@ -145,11 +147,11 @@ module EvalTest =
 
     [<Tests>]
     let ``recurse function`` =
-        let env = Env.init |> Primitives.load
+        let envRecurse = Env.init |> Primitives.load
 
         let tryPES =
             tryParse
-            >> eval env
+            >> eval envRecurse
             >> LispVal.toString
 
         test "recurse function" {
@@ -163,11 +165,11 @@ module EvalTest =
 
     [<Tests>]
     let ``closure`` =
-        let env = Env.init |> Primitives.load
+        let envClosure = Env.init |> Primitives.load
 
         let tryPES =
             tryParse
-            >> eval env
+            >> eval envClosure
             >> LispVal.toString
 
         test "closure" {
@@ -190,11 +192,11 @@ module EvalTest =
 
     [<Tests>]
     let ``mutual recursion`` =
-        let env = Env.init |> Primitives.load
+        let envMutual = Env.init |> Primitives.load
 
         let tryPES =
             tryParse
-            >> eval env
+            >> eval envMutual
             >> LispVal.toString
 
         test "mutual recursion" {
@@ -214,11 +216,11 @@ module EvalTest =
 
     // [<Tests>]
     let ``std`` =
-        let env = Env.init |> Primitives.load
+        let envStd = Env.init |> Primitives.load
 
         let tryPES =
             tryParse
-            >> eval env
+            >> eval envStd
             >> LispVal.toString
 
         test "std" {

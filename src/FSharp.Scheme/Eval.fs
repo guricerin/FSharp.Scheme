@@ -77,11 +77,11 @@ module Eval =
             PortIn.load filename
             |> List.map (eval env)
             |> List.last
-        | List [ Atom "apply"; func; target ] ->
+        | List [ Atom "apply"; func; args ] ->
             let func = eval env func
-            match eval env target with
+            match eval env args with
             | List args -> apply func args
-            | _ -> apply func [ target ]
+            | arg -> apply func [ arg ]
         | List(Atom "apply" :: func :: args)
         | List(func :: args) ->
             let func = eval env func

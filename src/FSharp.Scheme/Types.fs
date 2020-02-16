@@ -2,7 +2,6 @@ namespace FSharp.Scheme.Core
 
 module Types =
     open System.IO
-    open System.Collections.Generic
 
     type LispVal =
         | Atom of string
@@ -23,4 +22,4 @@ module Types =
           body: LispVal list
           closure: Env }
 
-    and Env = SortedDictionary<string, LispVal ref>
+    and Env = Map<string, LispVal ref> ref
