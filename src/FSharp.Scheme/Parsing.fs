@@ -1,10 +1,8 @@
 namespace FSharp.Scheme.Core
 
-open System
-
 module Parsing =
     open FParsec
-    open FSharp.Scheme.Core.Ast
+    open FSharp.Scheme.Core.Types
     open FSharp.Scheme.Core.Errors
 
     type Parser<'a> = Parser<'a, unit>

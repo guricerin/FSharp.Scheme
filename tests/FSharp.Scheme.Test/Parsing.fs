@@ -3,6 +3,7 @@ module FSharp.Scheme.Test.Parsing
 open System
 open Expecto
 open FParsec
+open FSharp.Scheme.Core.Types
 open FSharp.Scheme.Core.Ast
 open FSharp.Scheme.Core.Parsing
 
@@ -10,25 +11,34 @@ module ParsingTest =
 
     let config = { FsCheckConfig.defaultConfig with maxTest = 100 }
 
-    let parseTest input expect =
-        // let actual = run parseExpr input
-        // match actual with
-        // | Success(res, _, _) -> res = expect
-        // | Failure(msg, _, _) -> failwithf "%s" msg
-        let actual = parseBy input
-        actual = expect
 
     [<Tests>]
     let ``parse single integer`` =
+        let parseTest input expect =
+            let actual =
+                parseBy input
+                |> function
+                | Integer n -> n
+                | _ -> failwithf "unreachable!"
+            actual = expect
+
         let f (a: int) =
             let s = string a
-            let expect = Integer a
+            let expect = a
             parseTest s expect
 
         testPropertyWithConfig config "parse single integer" <| f
 
     // [<Tests>]
     let ``parse single float`` =
+        let parseTest input expect =
+            let actual =
+                parseBy input
+                |> function
+                | Float f -> f
+                | _ -> failwithf "unreachable!"
+            actual = expect
+
         let f (a: float) =
             let s =
                 match a with
@@ -37,98 +47,53 @@ module ParsingTest =
                 | _ when a = Double.NegativeInfinity -> "-Infinity"
                 | _ -> string a
 
-            let expect =
-                match a with
-                | _ when a = infinity -> Atom "infinity"
-                | _ when a = nan -> Atom "nan"
-                | _ when a = Double.NegativeInfinity -> Atom "-infinity"
-                | _ -> Float a
+            let expect = a
 
             parseTest s expect
 
         testPropertyWithConfig config "parse single float" <| f
 
-    let tryParse input = parseBy input
-    // match run parseExpr input with
-    // | Success(res, _, _) -> res
-    // | Failure(msg, _, _) -> failwithf "%s" msg
+    let tryParse input = parseBy input |> LispVal.toString
 
     [<Tests>]
     let ``parse quote symbol`` =
         test "parse quote symbol" {
-            Expect.equal (tryParse "quote") (Atom "quote") "quote"
-            let expect =
-                List
-                    [ Atom "quote"
-                      Integer 1
-                      Integer 2
-                      Integer 3 ]
+            Expect.equal (tryParse "quote") "quote" "quote"
+            let expect = "(quote 1 2 3)"
             Expect.equal (tryParse "(quote 1 2 3)") expect "(quote 1 2 3)"
-            let expect =
-                List
-                    [ Atom "quote"
-                      List
-                          [ Integer 1
-                            Integer 2
-                            Integer 3 ] ]
+            let expect = "(quote (1 2 3))"
             Expect.equal (tryParse "'(1 2 3)") expect "'(1 2 3)"
         }
 
     [<Tests>]
     let ``parse nested list`` =
         test "parse nested list" {
-            let expect =
-                List
-                    ([ Atom "a"
-                       Atom "test" ])
-            Expect.equal (parseBy "(a test)") expect "(a test)"
-            let expect =
-                List
-                    [ Atom "a"
-                      List [ Atom "nested" ]
-                      Atom "test" ]
-            Expect.equal (parseBy "(a (nested) test)") expect "(a (nested) test)"
-            let expect =
-                List
-                    [ Atom "a"
-                      DottedList([ Atom "dotted" ], Atom "list")
-                      Atom "test" ]
-            Expect.equal (parseBy "(a (dotted . list) test)") expect "(a (dotted . list) test)"
-            let expect =
-                List
-                    [ Atom "a"
-                      List
-                          [ Atom "quote"
-                            List
-                                [ Atom "quoted"
-                                  DottedList([ Atom "dotted" ], Atom "list") ] ]
-                      Atom "test" ]
-            Expect.equal (parseBy "(a '(quoted (dotted . list)) test)") expect "(a '(quoted (dotted . list)) test)"
+            let expect = "(a test)"
+            Expect.equal (tryParse "(a test)") expect "(a test)"
+            let expect = "(a (nested) test)"
+            Expect.equal (tryParse "(a (nested) test)") expect "(a (nested) test)"
+            let expect = "(a (dotted . list) test)"
+            Expect.equal (tryParse "(a (dotted . list) test)") expect "(a (dotted . list) test)"
+            let expect = "(a (quote (quoted (dotted . list))) test)"
+            Expect.equal (tryParse "(a '(quoted (dotted . list)) test)") expect "(a '(quoted (dotted . list)) test)"
         }
 
     [<Tests>]
     let ``parse dotted list`` =
         test "parse dotted list" {
-            let expect = DottedList([ Integer 1 ], Integer 2)
+            let expect = "(1 . 2)"
             Expect.equal (tryParse "(1 . 2)") expect "(1 . 2)"
-            let expect =
-                DottedList
-                    ([ Integer 1
-                       Integer 2 ], Integer 3)
+            let expect = "(1 2 . 3)"
             Expect.equal (tryParse "(1 2 . 3)") expect "(1 2 . 3)"
         }
 
     [<Tests>]
     let ``parse paren with spaces`` =
         test "parse paren with spaces" {
-            let expect =
-                List
-                    [ Atom "+"
-                      Integer 1
-                      Integer 2 ]
-            Expect.equal (parseBy "(+ 1 2)") expect "(+ 1 2)"
-            Expect.equal (parseBy "(+   1     2)") expect "(+   1     2)"
-            Expect.equal (parseBy "( + 1 2)") expect "( + 1 2)"
-            Expect.equal (parseBy "(+ 1 2 )") expect "(+ 1 2 )"
-            Expect.equal (parseBy "( + 1 2 )") expect "( + 1 2 )"
+            let expect = "(+ 1 2)"
+            Expect.equal (tryParse "(+ 1 2)") expect "(+ 1 2)"
+            Expect.equal (tryParse "(+   1     2)") expect "(+   1     2)"
+            Expect.equal (tryParse "( + 1 2)") expect "( + 1 2)"
+            Expect.equal (tryParse "(+ 1 2 )") expect "(+ 1 2 )"
+            Expect.equal (tryParse "( + 1 2 )") expect "( + 1 2 )"
         }

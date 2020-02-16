@@ -2,15 +2,7 @@ namespace FSharp.Scheme.Core
 
 module Ast =
     open System
-
-    type LispVal =
-        | Atom of string
-        | List of LispVal list
-        | DottedList of LispVal list * LispVal
-        | Integer of int
-        | Float of float
-        | String of string
-        | Bool of bool
+    open Types
 
     [<RequireQualifiedAccess>]
     module LispVal =
@@ -25,6 +17,15 @@ module Ast =
             | Bool false -> "#f"
             | List ls -> sprintf "(%s)" (unwordsList ls)
             | DottedList(head, tail) -> sprintf "(%s . %s)" (unwordsList head) (toString tail)
+            | PrimitiveFunc _ -> "<primitive>"
+            | Func func ->
+                let param = String.Join(" ", func.param)
+
+                let vararg =
+                    match func.vararg with
+                    | Some(a) -> sprintf " . %s" a
+                    | None -> ""
+                sprintf "(lambda (%s%s) ...)" param vararg
 
         and unwordsList contents =
             contents

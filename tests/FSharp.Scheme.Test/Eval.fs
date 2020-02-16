@@ -3,9 +3,11 @@ module FSharp.Scheme.Test.Eval
 open System
 open Expecto
 open FParsec
+open FSharp.Scheme.Core.Types
 open FSharp.Scheme.Core.Ast
-open FSharp.Scheme.Core.Env
 open FSharp.Scheme.Core.Parsing
+open FSharp.Scheme.Core.Env
+open FSharp.Scheme.Core.Primitives
 open FSharp.Scheme.Core.Eval
 
 module EvalTest =
@@ -15,55 +17,54 @@ module EvalTest =
         | Success(res, _, _) -> res
         | Failure(msg, _, _) -> failwithf "%s" msg
 
-    let env = Env.init
+    let env = Env.init |> Primitives.load
 
     let tryPE = tryParse >> eval env
+    let tryPES = tryPE >> LispVal.toString
 
     [<Tests>]
     let ``eval int`` =
         test "eval int" {
-            let expect = Integer 3
-            Expect.equal (tryPE "(+ 1 2)") expect "(+ 1 2)"
-            let expect = Integer 5
-            Expect.equal (tryPE "(+ 2 (- 4 1))") expect "(+ 2 (- 4 1))"
-            let expect = Integer -1
-            Expect.equal (tryPE "(+ 2 -4 1)") expect "(+ 2 -4 1)"
-            let expect = Integer 3
-            Expect.equal (tryPE "(- (+ 4 6 3) 3 5 2)") expect "(- (+ 4 6 3) 3 5 2)"
+            let expect = "3"
+            Expect.equal (tryPES "(+ 1 2)") expect "(+ 1 2)"
+            let expect = "5"
+            Expect.equal (tryPES "(+ 2 (- 4 1))") expect "(+ 2 (- 4 1))"
+            let expect = "-1"
+            Expect.equal (tryPES "(+ 2 -4 1)") expect "(+ 2 -4 1)"
+            let expect = "3"
+            Expect.equal (tryPES "(- (+ 4 6 3) 3 5 2)") expect "(- (+ 4 6 3) 3 5 2)"
         }
 
     [<Tests>]
     let ``eval bool`` =
         test "eval bool" {
             let input = "(< 2 3)"
-            let expect = Bool true
-            Expect.equal (tryPE input) expect input
+            let expect = "#t"
+            Expect.equal (tryPES input) expect input
             let input = "(> 2 3)"
-            let expect = Bool false
-            Expect.equal (tryPE input) expect input
+            let expect = "#f"
+            Expect.equal (tryPES input) expect input
             let input = "(>= 3 3)"
-            let expect = Bool true
-            Expect.equal (tryPE input) expect input
+            let expect = "#t"
+            Expect.equal (tryPES input) expect input
             let input = "(string=? \"test\" \"test\")"
-            let expect = Bool true
-            Expect.equal (tryPE input) expect input
+            let expect = "#t"
+            Expect.equal (tryPES input) expect input
             let input = "(string<? \"abc\" \"bba\")"
-            let expect = Bool true
-            Expect.equal (tryPE input) expect input
+            let expect = "#t"
+            Expect.equal (tryPES input) expect input
         }
 
     [<Tests>]
     let ``eval if`` =
         test "eval if" {
             let input = "(if (> 2 3) \"no\" \"yes\")"
-            let expect = String "yes"
-            Expect.equal (tryPE input) expect input
+            let expect = "\"yes\""
+            Expect.equal (tryPES input) expect input
             let input = "(if (= 3 3) (+ 2 3 (- 5 1)) \"unequal\")"
-            let expect = Integer 9
-            Expect.equal (tryPE input) expect input
+            let expect = "9"
+            Expect.equal (tryPES input) expect input
         }
-
-    let tryPES = tryPE >> LispVal.toString
 
     [<Tests>]
     let ``eval list operation`` =
@@ -96,7 +97,7 @@ module EvalTest =
 
     [<Tests>]
     let ``define`` =
-        let env = Env.init
+        let env = Env.init |> Primitives.load
 
         let tryPES =
             tryParse
@@ -120,5 +121,68 @@ module EvalTest =
             Expect.equal (tryPES input) expect input
             let input = "(string<? str \"The string\")"
             let expect = "#t"
+            Expect.equal (tryPES input) expect input
+        }
+
+    [<Tests>]
+    let ``define func`` =
+        let env = Env.init |> Primitives.load
+
+        let tryPES =
+            tryParse
+            >> eval env
+            >> LispVal.toString
+
+        test "define func" {
+            let input = "(define (f x y) (+ x y))"
+            let expect = "(lambda (x y) ...)"
+            Expect.equal (tryPES input) expect input
+            let input = "(f 1 2)"
+            let expect = "3"
+            Expect.equal (tryPES input) expect input
+        }
+
+    [<Tests>]
+    let ``recurse function`` =
+        let env = Env.init |> Primitives.load
+
+        let tryPES =
+            tryParse
+            >> eval env
+            >> LispVal.toString
+
+        test "recurse function" {
+            let input = "(define (factorial x) (if (= x 1) 1 (* x (factorial (- x 1)))))"
+            let expect = "(lambda (x) ...)"
+            Expect.equal (tryPES input) expect input
+            let input = "(factorial 10)"
+            let expect = "3628800"
+            Expect.equal (tryPES input) expect input
+        }
+
+    [<Tests>]
+    let ``closure`` =
+        let env = Env.init |> Primitives.load
+
+        let tryPES =
+            tryParse
+            >> eval env
+            >> LispVal.toString
+
+        test "closure" {
+            let input = "(define (counter inc) (lambda (x) (set! inc (+ x inc)) inc))"
+            let expect = "(lambda (inc) ...)"
+            Expect.equal (tryPES input) expect input
+            let input = "(define my-count (counter 5))"
+            let expect = "(lambda (x) ...)"
+            Expect.equal (tryPES input) expect input
+            let input = "(my-count 3)"
+            let expect = "8"
+            Expect.equal (tryPES input) expect input
+            let input = "(my-count 6)"
+            let expect = "14"
+            Expect.equal (tryPES input) expect input
+            let input = "(my-count 5)"
+            let expect = "19"
             Expect.equal (tryPES input) expect input
         }

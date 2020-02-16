@@ -1,17 +1,15 @@
 namespace FSharp.Scheme.Core
 
 module Env =
-    open System
-    open System.Collections.Generic
-    open FSharp.Scheme.Core.Ast
+    open FSharp.Scheme.Core.Types
     open FSharp.Scheme.Core.Errors
-
-    type Env = SortedDictionary<string, LispVal>
 
     [<RequireQualifiedAccess>]
     module Env =
 
         let init: Env = Env()
+
+        let clone (env: Env) = Env(env)
 
         let isBound (env: Env) (varname: string): bool = env.ContainsKey(varname)
 
@@ -32,3 +30,5 @@ module Env =
             | true -> setVar env varname x |> ignore
             | false -> env.Add(varname, x)
             x
+
+        let bindVars (env: Env) (bindings: (string * LispVal) list) = List.iter (fun (k, v) -> env.Add(k, v)) bindings

@@ -4,12 +4,13 @@ open System
 open FSharp.Scheme.Core
 open FSharp.Scheme.Core.Ast
 open FSharp.Scheme.Core.Env
+open FSharp.Scheme.Core.Primitives
 open FSharp.Scheme.Core.Errors
 
 let printPrompt() =
     printf "\nLisp>>> "
 
-let gEnv = Env.init
+let gEnv = Env.init |> Primitives.load
 
 let rep input =
     try

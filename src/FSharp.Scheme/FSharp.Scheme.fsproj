@@ -4,10 +4,12 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Types.fs" />
     <Compile Include="Ast.fs" />
     <Compile Include="Errors.fs" />
-    <Compile Include="Env.fs" />
     <Compile Include="Parsing.fs" />
+    <Compile Include="Env.fs" />
+    <Compile Include="Primitives.fs" />
     <Compile Include="Eval.fs" />
   </ItemGroup>
   <Import Project="..\..\.paket\Paket.Restore.targets" />
