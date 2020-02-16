@@ -11,17 +11,6 @@ Scheme Interpreter Implementation with F#
 
 https://github.com/wraikny/FsTemplate
 
-<!-- ## CI Status
-|||
-:---|:---
-|Github Actions|[![](https://github.com/guricerin/FSharp.Scheme/workflows/CI/badge.svg)](https://github.com/guricerin/FSharp.Scheme/actions?workflow=CI)|
-|Travis CI|[![](https://travis-ci.org/guricerin/FSharp.Scheme.svg?branch=master)](https://travis-ci.org/guricerin/FSharp.Scheme)|
-|AppVeyor|[![](https://ci.appveyor.com/api/projects/status/5vtyb8v9twdpteb6?svg=true)](https://ci.appveyor.com/project/guricerin/FSharp.Scheme)| -->
-
-<!---
-comment out in Markdown.
---->
-
 ## Restoring after Clone
 ```shell
 $ dotnet tool restore
@@ -39,10 +28,6 @@ $ dotnet run -p src/FSharp.Scheme.Repl [-c {Debug|Release}]
 ```
 
 ## Tests
-```shell
-$ dotnet fake build -t Test
-```
-OR
 ```
 $ dotnet run --project tests/SampleTest
 ```
@@ -62,26 +47,6 @@ Scripting at [build.fsx](/build.fsx).
 $ dotnet fake build -t Clean # Run "Clean" Target
 $ dotnet fake build # Run Default Taret
 ```
-
-## Create Project
-```shell
-$ dotnet new console -lang=f# -o src/SampleApp # Application
-$ echo 'FSharp.Core' > src/SampleApp/paket.references
-
-$ dotnet new classlib -lang=f# -o src/SampleLib # Library
-$ echo 'FSharp.Core' > src/SampleLib/paket.references
-
-$ paket install # Add reference of Paket to .fsproj file
-```
-
-## Create Test Project
-```shell
-$ dotnet new console -lang=f# -o tests/SampleTest
-$ echo -e 'FSharp.Core\nExpecto\nExpecto.FsCheck' > tests/SampleTest/paket.references
-
-$ paket install # Add reference of Paket to .fsproj file
-```
-and then, Add **Project Name** to [build.fsx](/build.fsx).
 
 ## Tool Update
 ```shell
