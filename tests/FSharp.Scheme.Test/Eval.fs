@@ -1,6 +1,7 @@
 module FSharp.Scheme.Test.Eval
 
 open System
+open System.IO
 open Expecto
 open FParsec
 open FSharp.Scheme.Core.Types
@@ -208,5 +209,32 @@ module EvalTest =
             Expect.equal (tryPES input) expect input
             let input = "y"
             let expect = "15"
+            Expect.equal (tryPES input) expect input
+        }
+
+    // [<Tests>]
+    let ``std`` =
+        let env = Env.init |> Primitives.load
+
+        let tryPES =
+            tryParse
+            >> eval env
+            >> LispVal.toString
+
+        test "std" {
+            let projectPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..//..//"))
+            let stdfile = @"std.scm"
+            let path = Path.Combine(projectPath, stdfile)
+            let input = sprintf "(load \"%s\")" path
+            let expect = "(lambda (pred xs) ...)"
+            Expect.equal (tryPES input) expect input
+            let input = "(define xs '(1 2 3 4 5))"
+            let expect = "(1 2 3 4 5)"
+            Expect.equal (tryPES input) expect input
+            let input = "(define ys (map (curry * 2) xs))"
+            let expect = "(2 4 6 8 10)"
+            Expect.equal (tryPES input) expect input
+            let input = "(apply sum (filter (curry < 5) ys))"
+            let expect = "24"
             Expect.equal (tryPES input) expect input
         }
