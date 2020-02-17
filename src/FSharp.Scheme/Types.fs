@@ -2,6 +2,7 @@ namespace FSharp.Scheme.Core
 
 module Types =
     open System.IO
+    open System.Collections.Generic
 
     type LispVal =
         | Atom of string
@@ -17,9 +18,11 @@ module Types =
         | PortOut of StreamWriter
 
     and Func =
-        { param: string list
+        { parms: string list
           vararg: string option // 可変長引数
           body: LispVal list
-          closure: Env }
+          closure: EnvChain }
 
-    and Env = Map<string, LispVal ref> ref
+    and Env = SortedDictionary<string, LispVal>
+
+    and EnvChain = Env list

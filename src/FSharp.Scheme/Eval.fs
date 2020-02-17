@@ -8,16 +8,16 @@ module Eval =
     open FSharp.Scheme.Core.Errors
     open FSharp.Scheme.Core.Io
 
-    let rec bindArgsCore param args (env: Env) =
-        match param, args with
+    let rec bindArgsCore parms args (env: Env) =
+        match parms, args with
         | [], [] -> env
         | p :: ps, a :: ass ->
             Env.defineVar env p a |> ignore
             bindArgsCore ps ass env
         | _ -> raise <| DefaultException("Interpreter error - failed to detect NumArg mismatch")
 
-    let rec bindVarargs param args vararg (env: Env) =
-        match param, args with
+    let rec bindVarargs parms args vararg (env: Env) =
+        match parms, args with
         | [], [] -> env
         | p :: ps, a :: ass ->
             Env.defineVar env p a |> ignore
@@ -28,18 +28,18 @@ module Eval =
         | _ -> raise <| DefaultException("Interpreter error - failed to detect NumArg mismatch")
 
     let bindArgs (func: Func) args =
-        let nparam, nargs = List.length func.param, List.length args
-        match nparam <> nargs, func.vararg with
-        | true, _ -> raise <| NumArgsException(nparam, nargs, args)
-        | false, Some varg -> bindVarargs func.param args varg (Env.clone func.closure)
-        | false, None -> bindArgsCore func.param args (Env.clone func.closure)
+        let nparms, nargs = List.length func.parms, List.length args
+        match nparms <> nargs, func.vararg with
+        | true, _ -> raise <| NumArgsException(nparms, nargs, args)
+        | false, Some varg -> bindVarargs func.parms args varg (Env.clone func.closure)
+        | false, None -> bindArgsCore func.parms args (Env.clone func.closure)
 
-    let initFunc param vararg body env =
+    let initFunc parms vararg body env =
         let deatom =
             function
             | Atom a -> a
-            | e -> raise <| TypeMismatchException("Function parameter must be Atom", e)
-        { param = List.map deatom param
+            | e -> raise <| TypeMismatchException("Function parmseter must be Atom", e)
+        { parms = List.map deatom parms
           vararg = vararg
           body = body
           closure = env }
@@ -66,12 +66,12 @@ module Eval =
             form
             |> eval env
             |> Env.defineVar env var
-        | List(Atom "define" :: List(Atom var :: param) :: body) ->
-            initFunc param None body env |> Env.defineVar env var
-        | List(Atom "define" :: DottedList(Atom var :: param, Atom varg) :: body) ->
-            initFunc param (Some varg) body env |> Env.defineVar env var
-        | List(Atom "lambda" :: List param :: body) -> initFunc param None body env
-        | List(Atom "lambda" :: DottedList(param, Atom varg) :: body) -> initFunc param (Some varg) body env
+        | List(Atom "define" :: List(Atom var :: parms) :: body) ->
+            initFunc parms None body env |> Env.defineVar env var
+        | List(Atom "define" :: DottedList(Atom var :: parms, Atom varg) :: body) ->
+            initFunc parms (Some varg) body env |> Env.defineVar env var
+        | List(Atom "lambda" :: List parms :: body) -> initFunc parms None body env
+        | List(Atom "lambda" :: DottedList(parms, Atom varg) :: body) -> initFunc parms (Some varg) body env
         | List(Atom "lambda" :: Atom varg :: body) -> initFunc [] (Some varg) body env
         | List [ Atom "load"; String filename ] ->
             PortIn.load filename
