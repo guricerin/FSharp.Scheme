@@ -1,6 +1,5 @@
 ﻿module FSharp.Scheme.Repl
 
-open System
 open FSharp.Scheme.Core
 open FSharp.Scheme.Core.Types
 open FSharp.Scheme.Core.Ast
@@ -42,19 +41,25 @@ let runOne (argv: string array) =
         argv
         |> List.ofArray
         |> List.skip 1
-        |> List.map (fun x -> ("args", LispVal.String x))
+        |> List.map LispVal.String
+        |> LispVal.List
+        |> fun x -> ("args", x)
 
     let filename = Array.head argv |> LispVal.String
 
-    let env = Primitives.init() |> fun e -> Env.bindVars e args
+    let env = Primitives.init() |> fun e -> Env.bindVars e [ args ]
 
-    let res =
+    try
         Eval.eval env
             (List
                 [ Atom "load"
                   filename ])
         |> LispVal.toString
-    printfn "%s" res
+        |> printfn "%s"
+    with ex ->
+        ex
+        |> LispError.toString
+        |> printfn "%s"
 
 [<EntryPoint>]
 let main argv =

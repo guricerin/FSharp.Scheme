@@ -1,13 +1,13 @@
 # FSharp.Scheme
 Scheme Interpreter Implementation with F#
 
-## Reference
+## References
 
 * [48時間でSchemeを書こう](https://en.wikibooks.org/wiki/Write_Yourself_a_Scheme_in_48_Hours)
 * [ぐるぐる～ - FParsecでJSONパーサーを書いてみる話](http://bleis-tift.hatenablog.com/entry/json-parser-using-fparsec)
 * [Arantium Maestum - OCamlで48 Hour Schemeをやってみる](http://zehnpaard.hatenablog.com/entry/2019/06/15/223016)
 
-## Thanks
+## Thanks for Template
 
 https://github.com/wraikny/FsTemplate
 
@@ -22,14 +22,16 @@ $ dotnet paket restore
 $ dotnet fake build
 ```
 
-## Run
+## Run Repl
 ```shell
-$ dotnet run -p src/FSharp.Scheme.Repl [-c {Debug|Release}]
+$ dotnet run -p src/FSharp.Scheme.Repl
+# or
+$ dotnet run -p src/FSharp.Scheme.Repl <a scheme file path>
 ```
 
 ## Tests
 ```
-$ dotnet run --project tests/SampleTest
+$ dotnet run -p tests/SampleTest
 ```
 
 ## [Paket](https://fsprojects.github.io/Paket/index.html)  
