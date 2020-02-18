@@ -8,9 +8,6 @@
     <Compile Include="Parsing.fs" />
     <Compile Include="Eval.fs" />
     <Compile Include="Program.fs" />
-    <None Include="std.scm">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\FSharp.Scheme\FSharp.Scheme.fsproj" />
