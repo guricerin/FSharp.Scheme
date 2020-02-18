@@ -2,6 +2,7 @@
 
 open System
 open FSharp.Scheme.Core
+open FSharp.Scheme.Core.Types
 open FSharp.Scheme.Core.Ast
 open FSharp.Scheme.Core.Env
 open FSharp.Scheme.Core.Primitives
@@ -35,12 +36,31 @@ let rec repl() =
         rep input
         repl()
 
+let runOne (argv: string array) =
+    // schemeプログラムに渡すコマンドライン引数
+    let args =
+        argv
+        |> List.ofArray
+        |> List.skip 1
+        |> List.map (fun x -> ("args", LispVal.String x))
+
+    let filename = Array.head argv |> LispVal.String
+
+    let env = Primitives.init() |> fun e -> Env.bindVars e args
+
+    let res =
+        Eval.eval env
+            (List
+                [ Atom "load"
+                  filename ])
+        |> LispVal.toString
+    printfn "%s" res
+
 [<EntryPoint>]
 let main argv =
     match Array.length argv with
     | 0 ->
         printfn "Welcom Repl Room"
         repl()
-    | 1 -> rep argv.[0]
-    | _ -> printfn "Program takes only 0 or 1 argument"
+    | _ -> runOne argv
     0 // return an integer exit code
