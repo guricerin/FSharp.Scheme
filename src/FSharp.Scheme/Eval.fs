@@ -8,10 +8,6 @@ module Eval =
     open FSharp.Scheme.Core.Io
 
     let initFunc varargs env parms body =
-        let deatom =
-            function
-            | Atom a -> a
-            | e -> raise <| TypeMismatchException("Function parameter must be Atom", e)
         { parms = List.map LispVal.toString parms
           varargs = varargs
           body = body

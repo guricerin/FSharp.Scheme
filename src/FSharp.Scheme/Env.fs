@@ -12,8 +12,6 @@ module Env =
         /// xは変更されない
         let newRef (x: 'a) = ref x
 
-        let clone (env: Env) = newRef !env
-
         let isBound env varname = List.exists (fun (k, v) -> k = varname) !env
 
         let getVar (env: Env) (varname: string): LispVal =
