@@ -19,10 +19,10 @@ module Ast =
             | DottedList(head, tail) -> sprintf "(%s . %s)" (unwordsList head) (toString tail)
             | PrimitiveFunc _ -> "<primitive>"
             | Func func ->
-                let param = String.Join(" ", func.param)
+                let param = String.Join(" ", func.parms)
 
                 let vararg =
-                    match func.vararg with
+                    match func.varargs with
                     | Some(a) -> sprintf " . %s" a
                     | None -> ""
                 sprintf "(lambda (%s%s) ...)" param vararg

@@ -1,49 +1,38 @@
 namespace FSharp.Scheme.Core
 
 module Eval =
-    open System
     open FSharp.Scheme.Core.Types
     open FSharp.Scheme.Core.Ast
     open FSharp.Scheme.Core.Env
     open FSharp.Scheme.Core.Errors
     open FSharp.Scheme.Core.Io
 
-    let rec bindArgsCore parms args (env: Env) =
-        match parms, args with
-        | [], [] -> env
-        | p :: ps, a :: ass ->
-            Env.defineVar env p a |> ignore
-            bindArgsCore ps ass env
-        | _ -> raise <| DefaultException("Interpreter error - failed to detect NumArg mismatch")
-
-    let rec bindVarargs parms args vararg (env: Env) =
-        match parms, args with
-        | [], [] -> env
-        | p :: ps, a :: ass ->
-            Env.defineVar env p a |> ignore
-            bindVarargs ps ass vararg env
-        | [], _ ->
-            Env.defineVar env vararg (List args) |> ignore
-            env
-        | _ -> raise <| DefaultException("Interpreter error - failed to detect NumArg mismatch")
-
-    let bindArgs (func: Func) args =
-        let nparms, nargs = List.length func.parms, List.length args
-        match nparms <> nargs, func.vararg with
-        | true, _ -> raise <| NumArgsException(nparms, nargs, args)
-        | false, Some varg -> bindVarargs func.parms args varg (Env.clone func.closure)
-        | false, None -> bindArgsCore func.parms args (Env.clone func.closure)
-
-    let initFunc parms vararg body env =
+    let initFunc varargs env parms body =
         let deatom =
             function
             | Atom a -> a
-            | e -> raise <| TypeMismatchException("Function parmseter must be Atom", e)
-        { parms = List.map deatom parms
-          vararg = vararg
+            | e -> raise <| TypeMismatchException("Function parameter must be Atom", e)
+        { parms = List.map LispVal.toString parms
+          varargs = varargs
           body = body
           closure = env }
         |> Func
+
+    let initNormalFunc = initFunc None
+
+    let initVarArgs varargs =
+        varargs
+        |> LispVal.toString
+        |> Some
+        |> initFunc
+
+    let internal safeZip xs ys =
+        let rec loop ls rs acc =
+            match ls, rs with
+            | [], _ -> acc
+            | _, [] -> acc
+            | l :: ls, r :: rs -> loop ls rs ((l, r) :: acc)
+        loop xs ys [] |> List.rev
 
     let rec eval (env: Env) (x: LispVal): LispVal =
         match x with
@@ -52,7 +41,7 @@ module Eval =
         | Float _
         | Bool _ -> x
         | Atom id -> Env.getVar env id
-        | List [ Atom "quote"; ls ] -> ls // クォート外し
+        | List [ Atom "quote"; x ] -> x // クォート外し
         | List [ Atom "if"; pred; conseq; alt ] ->
             match eval env pred with
             | Bool true -> eval env conseq
@@ -67,12 +56,12 @@ module Eval =
             |> eval env
             |> Env.defineVar env var
         | List(Atom "define" :: List(Atom var :: parms) :: body) ->
-            initFunc parms None body env |> Env.defineVar env var
-        | List(Atom "define" :: DottedList(Atom var :: parms, Atom varg) :: body) ->
-            initFunc parms (Some varg) body env |> Env.defineVar env var
-        | List(Atom "lambda" :: List parms :: body) -> initFunc parms None body env
-        | List(Atom "lambda" :: DottedList(parms, Atom varg) :: body) -> initFunc parms (Some varg) body env
-        | List(Atom "lambda" :: Atom varg :: body) -> initFunc [] (Some varg) body env
+            initNormalFunc env parms body |> Env.defineVar env var
+        | List(Atom "define" :: DottedList(Atom var :: parms, varargs) :: body) ->
+            initVarArgs varargs env parms body |> Env.defineVar env var
+        | List(Atom "lambda" :: List parms :: body) -> initNormalFunc env parms body
+        | List(Atom "lambda" :: DottedList(parms, varargs) :: body) -> initVarArgs varargs env parms body
+        | List(Atom "lambda" :: Atom varargs :: body) -> initVarArgs (Atom varargs) env body []
         | List [ Atom "load"; String filename ] ->
             PortIn.load filename
             |> List.map (eval env)
@@ -93,8 +82,25 @@ module Eval =
         match func with
         | PrimitiveFunc pfn -> pfn args
         | Func func ->
-            let f = bindArgs func args |> eval
-            func.body
-            |> List.map f
-            |> List.last
+            let nparms, nargs = List.length func.parms, List.length args
+
+            let evalBody env =
+                func.body
+                |> List.map (eval env)
+                |> List.last
+
+            let remainingArgs = List.skip nparms args
+
+            let bindVarArgs arg env =
+                match arg with
+                | Some argname -> Env.bindVars env [ (argname, List remainingArgs) ]
+                | None -> env
+
+            if nparms <> nargs && func.varargs = None then
+                raise <| NumArgsException(nparms, nargs, args)
+            else
+                safeZip func.parms args
+                |> Env.bindVars func.closure
+                |> bindVarArgs func.varargs
+                |> evalBody
         | _ -> raise <| NotFunctionException("Non function", LispVal.toString func)

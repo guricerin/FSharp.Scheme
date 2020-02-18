@@ -114,11 +114,11 @@ module Primitives =
 
     [<RequireQualifiedAccess>]
     module Primitives =
-        let load (env: Env) =
+        let init() =
             let add varname body env =
                 Env.defineVar env varname (PrimitiveFunc body) |> ignore
                 env
-            env
+            Env.init
             |> add "+" (numericBinop (+))
             |> add "-" (numericBinop (-))
             |> add "*" (numericBinop (*))

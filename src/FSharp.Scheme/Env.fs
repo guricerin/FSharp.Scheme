@@ -7,43 +7,40 @@ module Env =
     [<RequireQualifiedAccess>]
     module Env =
 
-        let init: Env = Env()
+        let init: Env = ref []
 
-        let clone (env: Env) = Env(env)
+        /// xは変更されない
+        let newRef (x: 'a) = ref x
 
-        let tryFind (env: Env) (varname: string): LispVal option =
-            match env.TryGetValue varname with
-            | true, x -> Some x
-            | _ -> None
+        let clone (env: Env) = newRef !env
 
-        let bindVars (env: Env) (bindings: (string * LispVal) list) =
-            let f (v, e) = env := Map.add v (ref e) !env
-            List.iter f bindings
+        let isBound env varname = List.exists (fun (k, v) -> k = varname) !env
 
-    [<RequireQualifiedAccess>]
-    module EnvChain =
+        let getVar (env: Env) (varname: string): LispVal =
+            match List.tryFind (fun (k, v) -> k = varname) !env with
+            | Some(_, x) -> !x
+            | None -> raise <| UnboundVarException("Getting an unbound variable", varname)
 
-        let init: EnvChain = [ Env.init ]
+        let setVar (env: Env) (varname: string) (x: LispVal) =
+            match List.tryFind (fun (k, v) -> k = varname) !env with
+            | Some(_, oldx) ->
+                oldx := x
+                x
+            | None -> raise <| UnboundVarException("Setting an unbound variable", varname)
 
-        let getVar (envchain: EnvChain) (varname: string): LispVal =
-            let rec loop ls =
-                match ls with
-                | [] -> raise <| UnboundVarException("Getting an unbound variable", varname)
-                | e :: es ->
-                    match Env.tryFind e varname with
-                    | Some v -> v
-                    | None -> loop es
-            loop envchain
+        let defineVar (env: Env) (varname: string) (x: LispVal) =
+            if isBound env varname then
+                setVar env varname x
+            else
+                let value = newRef x
+                env := (varname, value) :: !env
+                x
 
-        let setVar (envchain: EnvChain) (varname: string) (x: LispVal) =
-            match envchain with
-            | e :: _ -> e.[varname] <- x
-            | [] -> raise <| UnboundVarException("Setting an unbound variable", varname)
+        let bindVars (env: Env) (bindings: (string * LispVal) list): Env =
+            let addBinding (varname, value) = (varname, newRef value)
 
-        let defineVar (envchain: EnvChain) (varname: string) (x: LispVal) =
-            match envchain with
-            | e :: _ ->
-                match Env.tryFind e varname with
-                | Some _ -> e.[varname] <- x
-                | None -> e.Add(varname, x)
-            | [] -> raise <| DefaultException("Environment is null")
+            let extendEnv =
+                bindings
+                |> List.map addBinding
+                |> List.fold (fun acc a -> a :: acc) !env
+            newRef extendEnv

@@ -19,10 +19,8 @@ module Types =
 
     and Func =
         { parms: string list
-          vararg: string option // 可変長引数
+          varargs: string option // 可変長引数
           body: LispVal list
-          closure: EnvChain }
+          closure: Env }
 
-    and Env = SortedDictionary<string, LispVal>
-
-    and EnvChain = Env list
+    and Env = (string * LispVal ref) list ref

@@ -10,7 +10,7 @@ open FSharp.Scheme.Core.Errors
 let printPrompt() =
     printf "\nLisp>>> "
 
-let gEnv = Env.init |> Primitives.load
+let gEnv = Primitives.init()
 
 let rep input =
     try

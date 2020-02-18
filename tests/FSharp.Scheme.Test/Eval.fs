@@ -18,7 +18,7 @@ module EvalTest =
         | Success(res, _, _) -> res
         | Failure(msg, _, _) -> failwithf "%s" msg
 
-    let env = Env.init |> Primitives.load
+    let env = Primitives.init()
 
     let tryPES =
         tryParse
@@ -100,11 +100,11 @@ module EvalTest =
 
     [<Tests>]
     let ``define`` =
-        let envDefine = Env.init |> Primitives.load
+        let env = Primitives.init()
 
         let tryPES =
             tryParse
-            >> eval envDefine
+            >> eval env
             >> LispVal.toString
         test "define" {
             let input = "(define x 3)"
@@ -129,31 +129,29 @@ module EvalTest =
 
     [<Tests>]
     let ``define func`` =
-        let envDefineFunc = Env.init |> Primitives.load
+        let env = Primitives.init()
 
         let tryPES =
             tryParse
-            >> eval envDefineFunc
+            >> eval env
             >> LispVal.toString
-
         test "define func" {
-            let input = "(define (f x y) (+ x y))"
+            let input = "(define (fuga x y) (+ x y))"
             let expect = "(lambda (x y) ...)"
             Expect.equal (tryPES input) expect input
-            let input = "(f 1 2)"
+            let input = "(fuga 1 2)"
             let expect = "3"
             Expect.equal (tryPES input) expect input
         }
 
     [<Tests>]
     let ``recurse function`` =
-        let envRecurse = Env.init |> Primitives.load
+        let env = Primitives.init()
 
         let tryPES =
             tryParse
-            >> eval envRecurse
+            >> eval env
             >> LispVal.toString
-
         test "recurse function" {
             let input = "(define (factorial x) (if (= x 1) 1 (* x (factorial (- x 1)))))"
             let expect = "(lambda (x) ...)"
@@ -165,13 +163,12 @@ module EvalTest =
 
     [<Tests>]
     let ``closure`` =
-        let envClosure = Env.init |> Primitives.load
+        let env = Primitives.init()
 
         let tryPES =
             tryParse
-            >> eval envClosure
+            >> eval env
             >> LispVal.toString
-
         test "closure" {
             let input = "(define (counter inc) (lambda (x) (set! inc (+ x inc)) inc))"
             let expect = "(lambda (inc) ...)"
@@ -192,13 +189,12 @@ module EvalTest =
 
     [<Tests>]
     let ``mutual recursion`` =
-        let envMutual = Env.init |> Primitives.load
+        let env = Primitives.init()
 
         let tryPES =
             tryParse
-            >> eval envMutual
+            >> eval env
             >> LispVal.toString
-
         test "mutual recursion" {
             let input = "(define (f x) (set! y (+ x y)))"
             let expect = "(lambda (x) ...)"
@@ -207,27 +203,27 @@ module EvalTest =
             let expect = "10"
             Expect.equal (tryPES input) expect input
             let input = "(f 5)"
-            let expect = "10"
+            let expect = "15"
             Expect.equal (tryPES input) expect input
             let input = "y"
             let expect = "15"
             Expect.equal (tryPES input) expect input
         }
 
-    // [<Tests>]
+    [<Tests>]
     let ``std`` =
-        let envStd = Env.init |> Primitives.load
+        let env = Primitives.init()
 
         let tryPES =
             tryParse
-            >> eval envStd
+            >> eval env
             >> LispVal.toString
-
         test "std" {
-            let projectPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..//..//"))
+            let projectPath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..//..//..//"))
             let stdfile = @"std.scm"
             let path = Path.Combine(projectPath, stdfile)
             let input = sprintf "(load \"%s\")" path
+            let input = input.Replace("\\", "\\\\")
             let expect = "(lambda (pred xs) ...)"
             Expect.equal (tryPES input) expect input
             let input = "(define xs '(1 2 3 4 5))"
